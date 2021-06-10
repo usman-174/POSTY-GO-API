@@ -11,16 +11,17 @@ import (
 )
 
 func Post(w http.ResponseWriter, r *http.Request) {
+	var err error
 	user := r.Context().Value(Mykey).(models.User)
 	post := models.Post{}
 	err = json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		fmt.Println(err)
 		respondWithJSON(w, map[string]string{
-			"Error": "Registration Failed",
-			"Msg":   err.Error(),
+			"error": "There was an error,Please try again.",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	db := database.ConnectDataBase()
@@ -30,20 +31,20 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		respondWithJSON(w, map[string]string{
-			"Error": "Couldn't create post",
-			"Msg":   err.Error(),
+			"error": "Couldn't create post.Try again Later.",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
-	err = db.Preload("User").Find(&post, "id = ?", post.ID).Error
+	err = db.Preload("User").Preload("Likes").Find(&post, "id = ?", post.ID).Error
 	if err != nil {
 		fmt.Println(err)
 		respondWithJSON(w, map[string]string{
-			"Error": "Couldn't create post",
-			"Msg":   err.Error(),
+			"error": "Couldn't create post",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 
@@ -51,23 +52,24 @@ func Post(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllPosts(w http.ResponseWriter, r *http.Request) {
+	var err error
 	db := database.ConnectDataBase()
 	getPost := []*models.Post{}
-	err = db.Preload("User").Preload("Likes").Find(&getPost).Error
+	err = db.Preload("User").Preload("Likes").Order("updated_at desc").Find(&getPost).Error
 	if err != nil {
 		fmt.Println(err)
 		respondWithJSON(w, map[string]string{
 			"Error": "Could not get posts",
 			"Msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	if len(getPost) == 0 {
 		respondWithJSON(w, map[string]string{
 			"Error": "Not posts found",
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	fmt.Println(getPost)
@@ -75,6 +77,7 @@ func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 
 }
 func GetPost(w http.ResponseWriter, r *http.Request) {
+	var err error
 	post := models.Post{}
 
 	err = json.NewDecoder(r.Body).Decode(&post)
@@ -85,15 +88,41 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 			"Error": "Invalid Arguments",
 			"Msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	err = db.Preload("User").Preload("Likes").Find(&post, "id = ?", post.ID).Error
+	if err != nil {
+		fmt.Println(err.Error())
+		respondWithJSON(w, map[string]string{
+			"error": "Could not load post. Please refresh",
+			"msg":   err.Error(),
+		})
+		return
+	}
 	respondWithJSON(w, post)
+}
+func GetMyPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	posts := []models.Post{}
+	user := r.Context().Value(Mykey).(models.User)
+	db := database.ConnectDataBase()
+
+	err = db.Preload("User").Preload("Likes").Order("updated_at desc").Find(&posts, "user_id = ?", user.ID).Error
+	if err != nil {
+		fmt.Println(err.Error())
+		respondWithJSON(w, map[string]string{
+			"error": "Could not load post. Please refresh",
+			"msg":   err.Error(),
+		})
+		return
+	}
+	respondWithJSON(w, posts)
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
-
+	var err error
 	user := r.Context().Value(Mykey).(models.User)
 	request := map[string]int{}
 	err = json.NewDecoder(r.Body).Decode(&request)
@@ -101,30 +130,38 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Invalid arguments",
-			"Msg":   err.Error(),
+			"error": "Invalid arguments",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	db := database.ConnectDataBase()
 	foundPost := &models.Post{}
-	err = db.Find(foundPost, "id = ?", request["id"]).Error
+	err = db.Find(&foundPost, "id = ?", request["id"]).Error
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Invalid arguments",
-			"Msg":   err.Error(),
+			"error": "Post Not Found.",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
+	if foundPost.ID == 0 {
+		respondWithJSON(w, map[string]string{
+			"error": "Post Not Found.",
+		})
 
+		return
+	}
+	fmt.Println("post.userid = ", foundPost.UserID)
+	fmt.Println("user.Id = ", user.ID)
 	if foundPost.UserID != user.ID {
 		respondWithJSON(w, map[string]string{
-			"Error": "Only the Post Author can delete the post",
+			"error": "Only the Post Author can delete the post",
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	db.Exec("DELETE FROM posts where id=?", request["id"])
@@ -136,17 +173,17 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
-
+	var err error
 	user := r.Context().Value(Mykey).(models.User)
 	request := map[string]string{}
 	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Invalid arguments 1",
-			"Msg":   err.Error(),
+			"error": "Invalid arguments 1",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	db := database.ConnectDataBase()
@@ -155,28 +192,28 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Cannot convert string id to int id",
-			"Msg":   err.Error(),
+			"error": "Cannot convert string id to int id",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	err = db.Preload("User").Find(foundPost, "id = ?", postId).Error
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Invalid arguments 2",
-			"Msg":   err.Error(),
+			"error": "Post not found.",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 
 	if foundPost.UserID != user.ID {
 		respondWithJSON(w, map[string]string{
-			"Error": "Only the Post Author can Update the post",
+			"error": "Only the Post Author can Update the post",
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	foundPost.Body = request["body"]
@@ -185,10 +222,10 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Invalid arguments 3",
-			"Msg":   err.Error(),
+			"error": "There was an error updating the post.",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 

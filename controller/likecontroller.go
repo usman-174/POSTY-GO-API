@@ -9,9 +9,8 @@ import (
 	"github.com/usman-174/models"
 )
 
-var like *models.Like
-
 func Likepost(w http.ResponseWriter, r *http.Request) {
+	var err error
 	user := r.Context().Value(Mykey).(models.User)
 	request := map[string]uint{}
 	err = json.NewDecoder(r.Body).Decode(&request)
@@ -21,7 +20,7 @@ func Likepost(w http.ResponseWriter, r *http.Request) {
 			"Error": "Invalid arguments",
 			"Msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
 	db := database.ConnectDataBase()
@@ -33,7 +32,7 @@ func Likepost(w http.ResponseWriter, r *http.Request) {
 	// 		"Error": "Invalid req.body",
 	// 		"Msg":   err.Error(),
 	// 	})
-	// 	http.Error(w, "Bad Request", http.StatusBadRequest)
+	//
 	// 	return
 	// }
 	foundpost := models.Post{}
@@ -41,22 +40,25 @@ func Likepost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Post not found",
-			"Msg":   err.Error(),
+			"error": "Post not found",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
-	db.Find(&like, "post_id = ?", request["id"])
+	LikedPost := &models.Like{}
 
-	if like.ID != 0 && like.UserID == user.ID {
-		db.Exec("DELETE FROM likes where id=? ", like.ID)
-		like = &models.Like{}
+	err = db.Find(&LikedPost, "post_id = ?", foundpost.ID).Error
+
+	if err != nil && LikedPost.ID != 0 || LikedPost.UserID == user.ID {
+		db.Exec("DELETE FROM likes where id=? ", LikedPost.ID)
 		respondWithJSON(w, map[string]string{
 			"msg": "Unliked post",
 		})
 		return
 	}
+	like := &models.Like{}
+
 	like.UserID = user.ID
 	like.PostID = foundpost.ID
 
@@ -64,21 +66,24 @@ func Likepost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 		respondWithJSON(w, map[string]string{
-			"Error": "Couldnt like the post",
-			"Msg":   err.Error(),
+			"error": "Couldnt like the post",
+			"msg":   err.Error(),
 		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+
 		return
 	}
-	err = db.Preload("Likes").Preload("User").Find(&foundpost, "id = ?", request["id"]).Error
-	if err != nil {
-		fmt.Println(err.Error())
-		respondWithJSON(w, map[string]string{
-			"Error": "Post not found",
-			"Msg":   err.Error(),
-		})
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	respondWithJSON(w, foundpost)
+	// err = db.Preload("Likes").Preload("User").Find(&foundpost, "id = ?", request["id"]).Error
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	respondWithJSON(w, map[string]string{
+	// 		"Error": "Post not found",
+	// 		"Msg":   err.Error(),
+	// 	})
+
+	// 	return
+	// }
+	respondWithJSON(w, map[string]string{
+
+		"msg": "Post Likes Successfully",
+	})
 }

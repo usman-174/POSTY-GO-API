@@ -11,5 +11,5 @@ type User struct {
 	Username  string `json:"username"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Posts     []Post `json:"posts" gorm:"ForeignKey:UserID"`
+	Posts     []Post `json:"posts" gorm:"ForeignKey:UserID;constraint:OnDelete:CASCADE;"`
 }

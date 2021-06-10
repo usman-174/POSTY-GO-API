@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -18,7 +17,6 @@ func ConnectDataBase() *gorm.DB {
 		log.Fatal("Error loading .env file")
 	}
 	dsn := os.Getenv("DSN")
-	fmt.Println(dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
