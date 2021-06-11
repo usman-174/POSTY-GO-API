@@ -7,7 +7,7 @@ import (
 )
 
 func Router() *mux.Router {
-	database.ConnectDataBase()
+	//database.ConnectDataBase()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/register", controller.Register).Methods("POST")
