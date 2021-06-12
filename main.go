@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	fmt.Println("main.go start")
 	server := app.Router()
 	err := godotenv.Load()
 	if err != nil {
@@ -27,5 +28,5 @@ func main() {
 	handler := c.Handler(server)
 	log.Fatal(http.ListenAndServe(port, handler))
 	fmt.Println("SERVER UP AND RUNNING")
-
+	fmt.Println("main.go STOP")
 }
