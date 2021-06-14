@@ -20,13 +20,17 @@ func main() {
 	}
 	clientUrl := os.Getenv("CLIENT_URL")
 	port := os.Getenv("PORT")
+	fmt.Println("port===", port)
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{clientUrl},
 		AllowCredentials: true,
 	})
 
 	handler := c.Handler(server)
-	log.Fatal(http.ListenAndServe(port, handler))
+	err = http.ListenAndServe(port, handler)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	fmt.Println("SERVER UP AND RUNNING")
 	fmt.Println("main.go STOP")
 }

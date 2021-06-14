@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,7 +12,6 @@ import (
 )
 
 func ConnectDataBase() *gorm.DB {
-	fmt.Println("database.go START")
 	err := godotenv.Load()
 
 	if err != nil {
@@ -28,7 +26,6 @@ func ConnectDataBase() *gorm.DB {
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Post{})
 	db.AutoMigrate(&models.Like{})
-	fmt.Println("database.go STOP")
 
 	return db
 }
