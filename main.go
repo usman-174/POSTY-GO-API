@@ -24,8 +24,8 @@ func main() {
 		fmt.Println(".env file loaded")
 	}
 	clientUrl := os.Getenv("CLIENT_URL")
-	// port := os.Getenv("PORT")
-	// fmt.Println("port===", port)
+	port := os.Getenv("PORT")
+	fmt.Println("port===", port)
 	fmt.Println("ClientUrl===", clientUrl)
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{clientUrl},
