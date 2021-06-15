@@ -14,7 +14,7 @@ import (
 
 func ConnectDataBase() *gorm.DB {
 	fmt.Println("STARTED DATABASE.go")
-	env := os.Getenv("env")
+	env := os.Getenv("ENV")
 	if env != "" || env == "development" {
 
 		err := godotenv.Load()
