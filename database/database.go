@@ -14,9 +14,13 @@ import (
 
 func ConnectDataBase() *gorm.DB {
 	fmt.Println("STARTED DATABASE.go")
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("ENV LOAD ERROR = ", err.Error())
+	env := os.Getenv("env")
+	if env == "development" {
+
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("ENV LOAD ERROR = ", err.Error())
+		}
 	}
 	dsn := os.Getenv("DSN")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
