@@ -26,6 +26,7 @@ func main() {
 	clientUrl := os.Getenv("CLIENT_URL")
 	port := os.Getenv("PORT")
 	fmt.Println("port===", port)
+	fmt.Println("ClientUrl===", clientUrl)
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{clientUrl},
 		AllowCredentials: true,
