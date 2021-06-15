@@ -22,11 +22,17 @@ func ConnectDataBase() *gorm.DB {
 			log.Fatal("ENV LOAD ERROR = ", err.Error())
 		}
 	}
-	dsn := os.Getenv("DSN")
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPass, dbPort, dbName)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatal("DATABASE LOAD ERROR : ")
+		log.Fatal("DATABASE LOAD ERROR occured")
 		panic(err.Error())
 	}
 	db.AutoMigrate(&models.User{})
