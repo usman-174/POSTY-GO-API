@@ -33,7 +33,7 @@ func main() {
 	})
 
 	handler := c.Handler(server)
-	err := http.ListenAndServe(":8080", handler)
+	err := http.ListenAndServe(":7000", handler)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
