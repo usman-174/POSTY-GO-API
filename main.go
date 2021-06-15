@@ -24,16 +24,14 @@ func main() {
 		fmt.Println(".env file loaded")
 	}
 	clientUrl := os.Getenv("CLIENT_URL")
-	port := os.Getenv("PORTX")
-	fmt.Println("port===", port)
-
+	port := os.Getenv("PORT")
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{clientUrl},
 		AllowCredentials: true,
 	})
-
+	fmt.Println("port===", port)
 	handler := c.Handler(server)
-	err := http.ListenAndServe(port, handler)
+	err := http.ListenAndServe(":"+port, handler)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
