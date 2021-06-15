@@ -24,7 +24,7 @@ func main() {
 		fmt.Println(".env file loaded")
 	}
 	clientUrl := os.Getenv("CLIENT_URL")
-	port := os.Getenv("PORT")
+	port := os.Getenv("PORTX")
 	fmt.Println("port===", port)
 	fmt.Println("ClientUrl===", clientUrl)
 	c := cors.New(cors.Options{
@@ -33,7 +33,7 @@ func main() {
 	})
 
 	handler := c.Handler(server)
-	err := http.ListenAndServe(":3000", handler)
+	err := http.ListenAndServe(port, handler)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

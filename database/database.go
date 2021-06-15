@@ -27,7 +27,7 @@ func ConnectDataBase() *gorm.DB {
 	dbHost := os.Getenv("DB_HOST")
 	dbName := os.Getenv("DB_NAME")
 	dbPort := os.Getenv("DB_PORT")
-	portx := os.Getenv("PORT")
+	portx := os.Getenv("PORTX")
 
 	fmt.Println("port = database=", portx)
 	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPass, dbPort, dbName)
