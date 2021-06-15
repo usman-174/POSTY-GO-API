@@ -14,9 +14,14 @@ import (
 func main() {
 	fmt.Println("main.go start")
 	server := app.Router()
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	env := os.Getenv("ENV")
+	if env == "development" {
+		fmt.Println("the env is in development")
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("ENV LOAD ERROR = ", err.Error())
+		}
+		fmt.Println(".env file loaded")
 	}
 	clientUrl := os.Getenv("CLIENT_URL")
 	port := os.Getenv("PORT")
@@ -27,7 +32,7 @@ func main() {
 	})
 
 	handler := c.Handler(server)
-	err = http.ListenAndServe(port, handler)
+	err := http.ListenAndServe(port, handler)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
