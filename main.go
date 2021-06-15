@@ -26,7 +26,7 @@ func main() {
 	// clientUrl := os.Getenv("CLIENT_URL")
 	port := os.Getenv("PORT")
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"clever-montalcini-cedd07.netlify.app"},
+		AllowedOrigins:   []string{"https://clever-montalcini-cedd07.netlify.app"},
 		AllowCredentials: true,
 	})
 	fmt.Println("port===", port)
