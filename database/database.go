@@ -8,20 +8,18 @@ import (
 	"github.com/usman-174/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"github.com/joho/godotenv"
 )
 
 func ConnectDataBase() *gorm.DB {
 	fmt.Println("STARTED DATABASE.go")
-	env := os.Getenv("ENV")
-	if env == "development" {
+	// env := os.Getenv("ENV")
+	// if env == "development" {
 
-		err := godotenv.Load()
-		if err != nil {
-			log.Fatal("ENV LOAD ERROR = ", err.Error())
-		}
-	}
+	// 	err := godotenv.Load()
+	// 	if err != nil {
+	// 		log.Fatal("ENV LOAD ERROR = ", err.Error())
+	// 	}
+	// }
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
