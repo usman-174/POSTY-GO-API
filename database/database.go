@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -12,16 +13,17 @@ import (
 )
 
 func ConnectDataBase() *gorm.DB {
+	fmt.Println("STARTED DATABASE.go")
 	err := godotenv.Load()
-
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("ENV LOAD ERROR = ", err.Error())
 	}
 	dsn := os.Getenv("DSN")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatal("DATABASE LOAD ERROR : ")
+		panic(err.Error())
 	}
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Post{})
