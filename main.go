@@ -12,29 +12,42 @@ import (
 )
 
 func main() {
-	fmt.Println("main.go start")
+	var c *cors.Cors
 	server := app.Router()
 	env := os.Getenv("ENV")
-	if env == "development" {
+	if env == "production" {
+		fmt.Println("the env is in production")
+
+		client_url := os.Getenv("CLIENT_URL")
+
+		c = cors.New(cors.Options{
+			AllowedOrigins:   []string{client_url},
+			AllowCredentials: true,
+		})
+
+		fmt.Println(".env file loaded")
+	} else {
 		fmt.Println("the env is in development")
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatal("ENV LOAD ERROR = ", err.Error())
 		}
-		fmt.Println(".env file loaded")
+		c = cors.New(cors.Options{
+			AllowedOrigins:   []string{"http://localhost:3000"},
+			AllowCredentials: true,
+		})
+
 	}
-	clientUrl := os.Getenv("CLIENT_URL")
+
 	port := os.Getenv("PORT")
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{clientUrl},
-		AllowCredentials: true,
-	})
-	fmt.Println("port===", port)
+
 	handler := c.Handler(server)
 	err := http.ListenAndServe(":"+port, handler)
 	if err != nil {
 		log.Fatal(err.Error())
+	} else {
+		fmt.Println("SERVER UP AND RUNNING")
+		fmt.Println("main.go STOP")
 	}
-	fmt.Println("SERVER UP AND RUNNING")
-	fmt.Println("main.go STOP")
+
 }

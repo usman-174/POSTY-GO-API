@@ -14,8 +14,10 @@ import (
 func ConnectDataBase() *gorm.DB {
 	fmt.Println("STARTED DATABASE.go")
 	env := os.Getenv("ENV")
-	if env == "development" {
-		fmt.Println("the env is in development")
+	if env == "production" {
+		fmt.Println("the env is in production")
+
+	} else {
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatal("ENV LOAD ERROR = ", err.Error())
@@ -28,17 +30,19 @@ func ConnectDataBase() *gorm.DB {
 	dbName := os.Getenv("DB_NAME")
 	dbPort := os.Getenv("DB_PORT")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPass, dbPort, dbName)
+	// dsn := fmt.Sprintf("host=localhost user=postgres password=postgres port=5432 dbname=auth sslmode=require")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPass, dbPort, dbName)
 	fmt.Println("dsn= ", dsn)
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	fmt.Println("connecting to database")
+	fmt.Println("trying to connect to database")
 	if err != nil {
 		log.Fatal("DATABASE LOAD ERROR occured")
-		panic(err.Error())
+
 	}
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Post{})
 	db.AutoMigrate(&models.Like{})
-	fmt.Println("Connected succesful")
+	fmt.Println("Connected to database succesfully.")
 	return db
 }
