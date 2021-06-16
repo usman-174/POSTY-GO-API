@@ -19,13 +19,12 @@ func main() {
 		fmt.Println("the env is in production")
 
 		client_url := os.Getenv("CLIENT_URL")
-
+		fmt.Println(client_url)
 		c = cors.New(cors.Options{
 			AllowedOrigins:   []string{client_url},
 			AllowCredentials: true,
 		})
 
-		fmt.Println(".env file loaded")
 	} else {
 		fmt.Println("the env is in development")
 		err := godotenv.Load()
